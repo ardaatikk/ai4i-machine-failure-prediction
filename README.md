@@ -398,4 +398,4 @@ Performance metrics reflect the specific AI4I dataset and train/validation/test 
 
 ## Future Improvements
 
-Potential extensions include probability calibration, additional model families, model explainability endpoints, containerization, deployment, monitoring, and validation on real industrial telemetry data.
+Potential extensions include probability calibration, additional model families, model explainability endpoints, containerization with docker, deployment, monitoring, and validation on real industrial telemetry data.
