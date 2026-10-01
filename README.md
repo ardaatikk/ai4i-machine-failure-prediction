@@ -1,5 +1,9 @@
 # AI4I Machine Failure Prediction
 
+[![CI](https://github.com/ardaatikk/ai4i-machine-failure-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/ardaatikk/ai4i-machine-failure-prediction/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An end-to-end machine learning project for predicting machine failures from operational and sensor measurements using the AI4I 2020 Predictive Maintenance Dataset.
 
 The project covers the complete ML workflow: data acquisition, preprocessing, feature engineering, model comparison, decision-threshold optimization, final evaluation, FastAPI inference, automated testing, and continuous integration.
