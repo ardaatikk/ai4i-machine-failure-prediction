@@ -7,16 +7,22 @@ from api.inference import (
     request_to_dataframe,
 )
 from api.schemas import (
+    EndpointLinks,
     HealthResponse,
     PredictionRequest,
     PredictionResponse,
+    RootResponse,
 )
 from src.models.config import (
     FINAL_MODEL_NAME,
     FINAL_MODEL_THRESHOLD,
 )
-from src.utils.config import FINAL_MODEL_PATH
-
+from src.utils.config import (
+    API_DESCRIPTION,
+    API_TITLE,
+    API_VERSION,
+    FINAL_MODEL_PATH,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,16 +34,28 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Predictive Maintenance ML API",
-    description=(
-        "Predict machine failure risk from operational "
-        "and sensor measurements."
-    ),
-    version="1.0.0",
+    title=API_TITLE,
+    description=API_DESCRIPTION,
+    version=API_VERSION,
     lifespan=lifespan,
 )
 
-
+@app.get(
+    "/",
+    response_model=RootResponse,
+)
+def root() -> RootResponse:
+    return RootResponse(
+        name=API_TITLE,
+        version=API_VERSION,
+        model=FINAL_MODEL_NAME,
+        endpoints=EndpointLinks(
+            health="/health",
+            predict="/predict",
+            docs="/docs",
+        ),
+    )
+    
 @app.get(
     "/health",
     response_model=HealthResponse,

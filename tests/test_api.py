@@ -15,7 +15,7 @@ from src.utils.config import FINAL_MODEL_PATH
 
 
 NORMAL_REQUEST = {
-    "machine_type": "L",
+    "product_quality": "L",
     "air_temperature_k": 301.5,
     "process_temperature_k": 309.8,
     "rotational_speed_rpm": 1549,
@@ -24,7 +24,7 @@ NORMAL_REQUEST = {
 }
 
 FAILURE_REQUEST = {
-    "machine_type": "L",
+    "product_quality": "L",
     "air_temperature_k": 303.3,
     "process_temperature_k": 311.3,
     "rotational_speed_rpm": 1350,
@@ -103,9 +103,9 @@ def test_prediction_probability_is_valid(client) -> None:
     assert 0.0 <= probability <= 1.0
 
 
-def test_invalid_machine_type_is_rejected(client) -> None:
+def test_invalid_product_quality_is_rejected(client) -> None:
     request = FAILURE_REQUEST.copy()
-    request["machine_type"] = "INVALID"
+    request["product_quality"] = "INVALID"
 
     response = client.post(
         "/predict",
@@ -185,3 +185,56 @@ def test_api_matches_direct_model_inference(
     assert api_probability == pytest.approx(
         direct_probability
     )
+    
+def test_root_endpoint(client) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "name" in data
+    assert "version" in data
+    assert "model" in data
+    assert "endpoints" in data
+
+    assert data["endpoints"]["health"] == "/health"
+    assert data["endpoints"]["predict"] == "/predict"
+    assert data["endpoints"]["docs"] == "/docs"
+    
+def test_load_inference_model_rejects_missing_file(
+    tmp_path,
+) -> None:
+    missing_model_path = (
+        tmp_path / "missing_model.joblib"
+    )
+
+    with pytest.raises(
+        FileNotFoundError,
+        match="Model not found",
+    ):
+        load_inference_model(
+            missing_model_path
+        )
+        
+def test_request_to_dataframe_creates_model_features() -> None:
+    request = PredictionRequest(
+        **FAILURE_REQUEST
+    )
+
+    dataframe = request_to_dataframe(
+        request
+    )
+
+    assert len(dataframe) == 1
+
+    assert dataframe.loc[0, "Type"] == "L"
+    assert dataframe.loc[0, "Air temperature [K]"] == 303.3
+    assert dataframe.loc[0, "Process temperature [K]"] == 311.3
+    assert dataframe.loc[0, "Rotational speed [rpm]"] == 1350
+    assert dataframe.loc[0, "Torque [Nm]"] == 48.1
+    assert dataframe.loc[0, "Tool wear [min]"] == 32
+
+    assert "Temperature difference [K]" in dataframe.columns
+    assert "Power proxy" in dataframe.columns
+    assert "Tool wear torque interaction" in dataframe.columns

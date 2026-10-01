@@ -24,7 +24,7 @@ def request_to_dataframe(
     request: PredictionRequest,
 ) -> pd.DataFrame:
     data = {
-        "Type": [request.machine_type],
+        "Type": [request.product_quality],
         "Air temperature [K]": [
             request.air_temperature_k
         ],

@@ -47,3 +47,12 @@ FIGURES_DIR = REPORTS_DIR / "figures"
 FINAL_EVALUATION_REPORT_PATH = (
     REPORTS_DIR / "final_evaluation.json"
 )
+
+API_TITLE = "Predictive Maintenance ML API"
+
+API_DESCRIPTION = (
+    "Predict machine failure risk from operational "
+    "and sensor measurements."
+)
+
+API_VERSION = "1.0.0"

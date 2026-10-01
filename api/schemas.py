@@ -1,10 +1,29 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PredictionRequest(BaseModel):
-    machine_type: Literal["L", "M", "H"]
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "product_quality": "L",
+                "air_temperature_k": 303.3,
+                "process_temperature_k": 311.3,
+                "rotational_speed_rpm": 1350,
+                "torque_nm": 48.1,
+                "tool_wear_min": 32,
+            }
+        }
+    )
+    
+    product_quality: Literal["L", "M", "H"] = Field(
+        ...,
+        description=(
+            "Product quality type: "
+            "L (low), M (medium), or H (high)."
+        ),
+    )
 
     air_temperature_k: float = Field(
         ...,
@@ -38,13 +57,52 @@ class PredictionRequest(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    prediction: int
-    label: str
-    failure_probability: float
-    threshold: float
-    model: str
+    prediction: Literal[0, 1] = Field(
+        ...,
+        description=(
+            "Binary prediction: "
+            "0 for normal operation, 1 for predicted failure."
+        ),
+    )
 
+    label: Literal["normal", "failure"] = Field(
+        ...,
+        description="Human-readable prediction label.",
+    )
+
+    failure_probability: float = Field(
+        ...,
+        ge=0,
+        le=1,
+        description="Predicted probability of machine failure.",
+    )
+
+    threshold: float = Field(
+        ...,
+        ge=0,
+        le=1,
+        description=(
+            "Decision threshold used to convert the "
+            "failure probability into a binary prediction."
+        ),
+    )
+
+    model: str = Field(
+        ...,
+        description="Machine learning model used for prediction.",
+    )
 
 class HealthResponse(BaseModel):
-    status: str
+    status: Literal["healthy"]
     model: str
+    
+class EndpointLinks(BaseModel):
+    health: str
+    predict: str
+    docs: str
+    
+class RootResponse(BaseModel):
+    name: str
+    version: str
+    model: str
+    endpoints: EndpointLinks
